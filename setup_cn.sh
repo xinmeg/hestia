@@ -1,19 +1,9 @@
 #!/bin/bash
-# 检查当前用户是否为 root 用户
-if [ $(id -u) -ne 0 ]; then
-    echo -e "\033[31m需要 root 权限执行此脚本，请使用 sudo 或者切换到 root 用户。\033[0m"
-    exit 1
-fi
-# 如果当前用户是 root 用户，则执行脚本的主体部分
-echo -e "\033[33m当前用户是 root 用户，开始执行 MCSManager 安装脚本。\033[0m"
+
 # Config
 mcsmanager_install_path="/home1/mcsmanager"
-mcsmanager_donwload_addr="https://gitee.com/mcsmanager/MCSManager/releases/download/release/mcsmanager_linux_release.tar.gz"
+mcsmanager_donwload_addr="https://github.com/MCSManager/MCSManager/releases/latest/download/mcsmanager_linux_release.tar.gz"
 node="v14.19.1"
-zh=$(
-    [[ $(locale -a) =~ "zh" ]] && echo 1
-    export LANG=zh_CN.UTF-8 || echo 0
-)
 
 error=""
 arch=$(uname -m)
@@ -48,9 +38,6 @@ echo_cyan "+--------------------------------------------------------------------
 +----------------------------------------------------------------------
 | Contributors: Nuomiaa, CreeperKong, Unitwk, FunnyShadow
 +----------------------------------------------------------------------
-
-We will use servers in the China to speed up your installation!
-我们将使用中国地区的服务器来加速您的安装速度！
 "
 
 Red_Error() {
@@ -70,13 +57,13 @@ Install_Node() {
 
   rm -rf  node-"$node"-linux-"$arch".tar.gz
 
-  wget https://npmmirror.com/mirrors/node/"$node"/node-"$node"-linux-"$arch".tar.gz
+  wget https://nodejs.org/dist/"$node"/node-"$node"-linux-"$arch".tar.gz
 
   tar -zxf node-"$node"-linux-"$arch".tar.gz
 
   rm -rf node-"$node"-linux-"$arch".tar.gz
 
-  if [ -f "$node_install_path"/bin/node ] && [ "$("$node_install_path"/bin/node -v)" == "$node" ]
+  if [[ -f "$node_install_path"/bin/node ]] && [[ "$("$node_install_path"/bin/node -v)" == "$node" ]]
   then
     echo_green "Success"
   else
@@ -121,13 +108,13 @@ Install_MCSManager() {
   cd daemon || exit
 
   echo_cyan "[+] Install MCSManager-Daemon dependencies..."
-  /usr/bin/env "$node_install_path"/bin/node "$node_install_path"/bin/npm install  --registry=https://registry.npmmirror.com --production > npm_install_log
+  /usr/bin/env "$node_install_path"/bin/node "$node_install_path"/bin/npm install --production > npm_install_log
 
   # echo "[←] cd .."
   cd ../web || exit
 
   echo_cyan "[+] Install MCSManager-Web dependencies..."
-  /usr/bin/env "$node_install_path"/bin/node "$node_install_path"/bin/npm install  --registry=https://registry.npmmirror.com --production > npm_install_log
+  /usr/bin/env "$node_install_path"/bin/node "$node_install_path"/bin/npm install --production > npm_install_log
 
   echo
   echo_yellow "=============== MCSManager ==============="
@@ -180,24 +167,9 @@ WantedBy=multi-user.target
   sleep 3
 
   printf "\n\n"
+
   echo_yellow "=================================================================="
-  if [ "$zh" == 1 ]; then
-    echo_green "安装已完成！欢迎使用 MCSManager 面板！"
-    echo_yellow " "
-    echo_cyan_n "控制面板地址：   "
-    echo_yellow "http://你的公网IP:23333"
-    echo_red "你必须开放 23333（面板）和 24444（守护进程用）端口，控制面板需要这两个端口才能正常工作。"
-    echo_yellow " "
-    echo_cyan "下面是常用的几个命令："
-    echo_cyan "启动面板 systemctl start mcsm-{daemon,web}.service"
-    echo_cyan "停止面板 systemctl stop mcsm-{daemon,web}.service"
-    echo_cyan "重启面板 systemctl restart mcsm-{daemon,web}.service"
-    echo_yellow " "
-    echo_cyan "官方文档（必读）：https://docs.mcsmanager.com/"
-    echo_yellow "=================================================================="
-  else
-    echo_yellow "=================================================================="
-    echo_green "Installation is complete! Welcome to the MCSManager panel!"
+  echo_green "Installation is complete! Welcome to the MCSManager panel !!!"
     echo_yellow " "
     echo_cyan_n "HTTP Web Service:        "; echo_yellow "http://<Your IP>:23333"
     echo_cyan_n "Daemon Address:          "; echo_yellow "ws://<Your IP>:24444"
@@ -210,25 +182,24 @@ WantedBy=multi-user.target
     echo_yellow " "
     echo_green "Official Document: https://docs.mcsmanager.com/"
     echo_yellow "=================================================================="
-  fi
 }
 
 
 
 # Environmental inspection
-if [ "$arch" == x86_64 ]; then
+if [[ "$arch" == x86_64 ]]; then
   arch=x64
   #echo "[-] x64 architecture detected"
-elif [ $arch == aarch64 ]; then
+elif [[ $arch == aarch64 ]]; then
   arch=arm64
   #echo "[-] 64-bit ARM architecture detected"
-elif [ $arch == arm ]; then
+elif [[ $arch == arm ]]; then
   arch=armv7l
   #echo "[-] 32-bit ARM architecture detected"
-elif [ $arch == ppc64le ]; then
+elif [[ $arch == ppc64le ]]; then
   arch=ppc64le
   #echo "[-] IBM POWER architecture detected"
-elif [ $arch == s390x ]; then
+elif [[ $arch == s390x ]]; then
   arch=s390x
   #echo "[-] IBM LinuxONE architecture detected"
 else
@@ -245,10 +216,10 @@ echo_cyan "[-] Architecture: $arch"
 
 # Install related software
 echo_cyan_n "[+] Installing dependent software(git,tar)... "
-if [ -x "$(command -v yum)" ]; then yum install -y git tar > error;
-elif [ -x "$(command -v apt-get)" ]; then apt-get install -y git tar > error;
-elif [ -x "$(command -v pacman)" ]; then pacman -Syu --noconfirm git tar > error;
-elif [ -x "$(command -v zypper)" ]; then sudo zypper --non-interactive install git tar > error;
+if [[ -x "$(command -v yum)" ]]; then yum install -y git tar > error;
+elif [[ -x "$(command -v apt-get)" ]]; then apt-get install -y git tar > error;
+elif [[ -x "$(command -v pacman)" ]]; then pacman -Syu --noconfirm git tar > error;
+elif [[ -x "$(command -v zypper)" ]]; then sudo zypper --non-interactive install git tar > error;
 fi
 
 # Determine whether the relevant software is installed successfully
